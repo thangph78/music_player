@@ -14,11 +14,18 @@ const repeatBtn = $(".btn-repeat")
 const propress = $("#progress")
 const playlist = $(".playlist")
 
+const PLAYER_STORAGE_KEY = 'music_player'
+
 const app = {
     currentIndex: 0,
     isPlaying: false,
     isRandom: false,
     isRepeat: false,
+    config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
+    setConfig: function(key,value) {
+        this.config[key] = value;
+        localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
+    },
     songs: [
         {
             name: "Ánh nắng của anh",
@@ -130,12 +137,14 @@ const app = {
         
         randomBtn.onclick = function(){
             _this.isRandom = !_this.isRandom
+            _this.setConfig("isRandom", _this.isRandom);
             randomBtn.classList.toggle("active",_this.isRandom)
         }
 
         repeatBtn.onclick = function(e){
 
-            _this.isRepeat = !_this.isRepeat
+            _this.isRepeat = !_this.isRepeat;
+            _this.setConfig("isRepeat", _this.isRepeat);
             repeatBtn.classList.toggle("active",_this.isRepeat)
         }
 
@@ -215,6 +224,11 @@ const app = {
         this.render()
     },
 
+    loadConfig: function(){
+        this.isRandom = this.config.isRandom
+        this.isRepeat = this.config.isRepeat
+    },
+
     nextSong: function(){
         this.currentIndex++
         if(this.currentIndex >  this.songs.length -1) {
@@ -247,10 +261,14 @@ const app = {
     },
 
     start: function(){
+        this.loadConfig()
         this.render();
         this.defineProperties();
         this.loadCurrentSong();
         this.handleEvents();
+
+        repeatBtn.classList.toggle("active",this.isRepeat)
+        randomBtn.classList.toggle("active",this.isRandom)
     }
 }
 
